@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마법 기호 인식</title>
+    <style>
+        body { text-align: center; }
+        canvas { border: 1px solid black; background-color: rgba(255, 255, 255, 0.9); }
+        #symbols { margin-top: 10px; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <h1>마법 기호를 그려보세요</h1>
+    <canvas id="canvas" width="500" height="500"></canvas>
+    <div id="symbols">기록된 문양: </div>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        let drawing = false;
+        let points = [];
+        let symbolsDiv = document.getElementById("symbols");
+
+        canvas.addEventListener("mousedown", (e) => {
+            drawing = true;
+            points = [];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            if (!drawing) return;
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            points.push({ x: e.offsetX, y: e.offsetY });
+        });
+
+        canvas.addEventListener("mouseup", () => {
+            drawing = false;
+            recognizePattern(points);
+            setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 500);
+        });
+
+        function recognizePattern(points) {
+            if (points.length < 5) return;
+            
+            let minX = Math.min(...points.map(p => p.x));
+            let maxX = Math.max(...points.map(p => p.x));
+            let minY = Math.min(...points.map(p => p.y));
+            let maxY = Math.max(...points.map(p => p.y));
+            let width = maxX - minX;
+            let height = maxY - minY;
+            
+            let start = points[0];
+            let end = points[points.length - 1];
+            let peak = points.reduce((p, c) => (c.y < p.y ? c : p), points[0]);
+            let valley = points.reduce((p, c) => (c.y > p.y ? c : p), points[0]);
+            let midX = (minX + maxX) / 2;
+            let midY = (minY + maxY) / 2;
+
+            if (width / height > 10) {
+                recordSymbol("ㅡ 가로");
+            } else if (height / width > 7) {
+                recordSymbol("ㅣ 세로");
+            } else if (peak.y === minY && start.y > peak.y && end.y > peak.y && Math.abs(start.x - minX) < 10 && Math.abs(end.x - maxX) < 10) {
+                recordSymbol("^ 꺾인 대각선");
+            } else if (valley.y === maxY && start.y < valley.y && end.y < valley.y && Math.abs(start.x - minX) < 10 && Math.abs(end.x - maxX) < 10) {
+                recordSymbol("V 꺾인 대각선");
+            } else if (Math.abs(start.x - end.x) < 50 && Math.abs(start.y - end.y) < 50 && peak.y < (minY + maxY) / 2) {
+                recordSymbol("❤️ 하트");
+            } else if ((width / height >= 3 / 7 && width / height <= 7 / 3) && Math.abs(end.x - midX) < 40 && Math.abs(end.y - midY) < 40) {
+                recordSymbol("🌀 소용돌이");
+            } else if (((start.y === maxY && end.y === minY) && (start.x !== maxX && end.x !== minX )) ||
+                      ((start.y === minY && end.y === maxY) && (start.x !== minX && end.x !== maxX ))) {
+                recordSymbol("⚡ 번개");
+            } else {
+                recordSymbol("❌ 인식 실패");
+            }
+        }
+
+        function recordSymbol(symbol) {
+            symbolsDiv.innerHTML += ` ${symbol}`;
+        }
+    </script>
+</body>
+</html>
+
+/////////////////////////////////////////////
