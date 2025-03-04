@@ -1,0 +1,31 @@
+<!doctype HTML>
+<html>
+  <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@1.6.0/dist/aframe-master.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+  <body style="margin : 0px; overflow: hidden;">
+    <!-- minimal loader shown until image descriptors are loaded -->
+    <div class="arjs-loader">
+      <div>Loading, please wait...</div>
+    </div>
+    
+    <a-scene
+      vr-mode-ui="enabled: false;"
+      renderer="logarithmicDepthBuffer: true; precision: medium;"
+      embedded
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: true;"
+    >
+      <!-- 변경된 경로로 patt와 glb 파일을 로드 -->
+      <a-marker type="pattern" url="http://localhost:3000/patt/std.patt">
+        <a-entity
+          gltf-model="http://localhost:3000/glb/ts.glb"
+          scale="1 5 3"
+          position="0 0 0"
+        >
+        </a-entity>
+      </a-marker>
+
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body>
+</html>
